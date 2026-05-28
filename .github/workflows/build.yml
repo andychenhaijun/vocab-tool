@@ -12,50 +12,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Setup Java
-      uses: actions/setup-java@v4
+    - name: Build with buildozer
+      uses: ArtemSBulgakov/buildozer-action@v1
       with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: Install system dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
-
-    - name: Install buildozer
-      run: |
-        python -m pip install --upgrade pip
-        pip install buildozer cython
-
-    - name: Setup Android SDK with build-tools
-      run: |
-        export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
-        mkdir -p $ANDROID_HOME
-        # 下载命令行工具
-        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdline-tools.zip
-        unzip /tmp/cmdline-tools.zip -d $ANDROID_HOME/
-        mv $ANDROID_HOME/cmdline-tools $ANDROID_HOME/latest
-        mkdir -p $ANDROID_HOME/cmdline-tools
-        mv $ANDROID_HOME/latest $ANDROID_HOME/cmdline-tools/
-        # 创建旧版 tools 符号链接，以便 buildozer 找到 sdkmanager
-        ln -sf $ANDROID_HOME/cmdline-tools/latest $ANDROID_HOME/tools
-        export PATH="$ANDROID_HOME/tools/bin:$PATH"
-        # 接受许可证
-        yes | sdkmanager --licenses > /dev/null 2>&1 || true
-        # 安装指定版本的 build-tools 和 platform
-        sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools"
-
-    - name: Build APK
-      run: buildozer android debug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: vocab-tool-apk
-        path: ./bin/*.apk
+        command: buildozer android debug
+        buildozer_version: master
