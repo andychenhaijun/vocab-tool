@@ -16,14 +16,15 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set permissions
+      # 赋予当前工作目录最高读写权限，防止后期打包生成文件时报 Permission Denied
       run: chmod -R 777 .
 
     - name: Build APK
+      # 【核心修复点】必须在运行打包命令的当前 Step 下，显式声明 env
       env:
-        # 【关键修复】设置此环境变量以绕过 root 权限下的交互式询问
-        BUILDOZER_ALLOW_ROOT: 1
+        BUILDOZER_ALLOW_ROOT: "1"
       run: |
-        # 不要在这里运行 buildozer init，否则会覆盖你现有的配置
+        # 直接全速编译打包，绕过 root 权限下的交互式弹窗询问
         buildozer android debug
 
     - name: Upload APK
