@@ -33,18 +33,23 @@ jobs:
         python -m pip install --upgrade pip
         pip install buildozer cython
 
-    - name: Install Android SDK build-tools via sdkmanager
+    - name: Setup Android SDK with build-tools
       run: |
         export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
         mkdir -p $ANDROID_HOME
-        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
-        unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
-        mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-        export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-        # Accept licenses (non-interactive)
+        # 下载命令行工具
+        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cmdline-tools.zip
+        unzip /tmp/cmdline-tools.zip -d $ANDROID_HOME/
+        mv $ANDROID_HOME/cmdline-tools $ANDROID_HOME/latest
+        mkdir -p $ANDROID_HOME/cmdline-tools
+        mv $ANDROID_HOME/latest $ANDROID_HOME/cmdline-tools/
+        # 创建旧版 tools 符号链接，以便 buildozer 找到 sdkmanager
+        ln -sf $ANDROID_HOME/cmdline-tools/latest $ANDROID_HOME/tools
+        export PATH="$ANDROID_HOME/tools/bin:$PATH"
+        # 接受许可证
         yes | sdkmanager --licenses > /dev/null 2>&1 || true
-        # Install build-tools and platform for API 33
-        sdkmanager "build-tools;33.0.2" "platforms;android-33"
+        # 安装指定版本的 build-tools 和 platform
+        sdkmanager "build-tools;33.0.2" "platforms;android-33" "platform-tools"
 
     - name: Build APK
       run: buildozer android debug
