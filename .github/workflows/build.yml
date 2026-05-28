@@ -10,21 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: kivy/buildozer:latest
-      # 显式允许 root 运行，防止 buildozer 权限报错
       options: --user root
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Fix permissions
+    - name: Set permissions
       run: chmod -R 777 .
 
     - name: Build APK
       env:
-        # 【关键修复】该环境变量会跳过 buildozer 对 root 权限的交互式询问
+        # 【关键修复】设置此环境变量以绕过 root 权限下的交互式询问
         BUILDOZER_ALLOW_ROOT: 1
       run: |
-        # 移除 buildozer init 以免覆盖现有的 buildozer.spec 配置
+        # 不要在这里运行 buildozer init，否则会覆盖你现有的配置
         buildozer android debug
 
     - name: Upload APK
