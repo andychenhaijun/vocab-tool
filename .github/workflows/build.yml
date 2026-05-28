@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK with Docker
 
 on:
   push:
@@ -8,12 +8,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: kivy/buildozer:latest
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-
-    - name: Build with buildozer
-      uses: ArtemSBulgakov/buildozer-action@v1
+    - name: Build APK
+      run: |
+        buildozer init
+        buildozer android debug
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
       with:
-        command: buildozer android debug
-        buildozer_version: master
+        name: vocab-tool-apk
+        path: ./bin/*.apk
