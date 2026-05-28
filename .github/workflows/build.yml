@@ -26,7 +26,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt update
-        sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+        sudo apt install -y git zip unzip openjdk-17-jdk autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
 
     - name: Install buildozer
       run: |
@@ -35,17 +35,15 @@ jobs:
 
     - name: Install Android SDK build-tools via sdkmanager
       run: |
-        # 确保 ANDROID_HOME 目录存在
         export ANDROID_HOME="$HOME/.buildozer/android/platform/android-sdk"
         mkdir -p $ANDROID_HOME
-        # 下载命令行工具
         wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
         unzip cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
         mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
         export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
-        # 接受许可证
+        # Accept licenses (non-interactive)
         yes | sdkmanager --licenses > /dev/null 2>&1 || true
-        # 安装 build-tools 33.0.2 (对应 API 33)
+        # Install build-tools and platform for API 33
         sdkmanager "build-tools;33.0.2" "platforms;android-33"
 
     - name: Build APK
