@@ -10,13 +10,25 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: kivy/buildozer:latest
+      # 必须以 root 身份运行以安装依赖，但我们需要授权 buildozer 处理 root
+      options: --user root
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+
+    - name: Fix ownership
+      # 由于容器是 root，必须将代码目录所有权赋予当前用户，否则 buildozer 会报错
+      run: chown -R $USER:$USER .
+
     - name: Build APK
+      env:
+        # 添加此环境变量以绕过 root 用户检查时的交互询问 [cite: 2]
+        BUILDOZER_ALLOW_ROOT: 1
       run: |
-        buildozer init
+        # 如果你已有 buildozer.spec，则不需要执行 init
+        # buildozer init
         buildozer android debug
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
